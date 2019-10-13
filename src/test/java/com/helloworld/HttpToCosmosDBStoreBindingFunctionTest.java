@@ -1,9 +1,6 @@
 package com.helloworld;
 
-import com.microsoft.azure.functions.ExecutionContext;
-import com.microsoft.azure.functions.HttpRequestMessage;
-import com.microsoft.azure.functions.HttpResponseMessage;
-import com.microsoft.azure.functions.HttpStatus;
+import com.microsoft.azure.functions.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -21,7 +18,7 @@ import static org.mockito.Mockito.*;
 /**
  * Unit test for Function class.
  */
-public class FunctionTest {
+public class HttpToCosmosDBStoreBindingFunctionTest {
     /**
      * Unit test for HttpTriggerJava method.
      */
@@ -29,9 +26,12 @@ public class FunctionTest {
     public void testHttpTriggerJava() throws Exception {
         // Setup
         @SuppressWarnings("unchecked") final HttpRequestMessage<Optional<String>> req = mock(HttpRequestMessage.class);
+        @SuppressWarnings("unchecked") final OutputBinding<String> outputBinding = mock(OutputBinding.class);
 
         final Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("name", "Azure");
+        queryParams.put("name", "Nebrass");
+        queryParams.put("email", "lnibrass@gmail.com");
+
         doReturn(queryParams).when(req).getQueryParameters();
 
         final Optional<String> queryBody = Optional.empty();
@@ -49,9 +49,16 @@ public class FunctionTest {
         doReturn(Logger.getGlobal()).when(context).getLogger();
 
         // Invoke
-        final HttpResponseMessage ret = new Function().run(req, context);
+        final HttpResponseMessage ret =
+                new HttpToCosmosDBStoreBindingFunction()
+                        .run(
+                                req,
+                                outputBinding,
+                                context
+                        );
 
         // Verify
-        assertEquals(ret.getStatus(), HttpStatus.OK);
+        assertEquals(HttpStatus.OK, ret.getStatus());
+        assertEquals("Document created successfully.", ret.getBody());
     }
 }
