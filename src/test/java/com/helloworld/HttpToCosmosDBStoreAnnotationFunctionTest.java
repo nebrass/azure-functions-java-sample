@@ -4,6 +4,7 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -13,7 +14,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.helloworld.FunctionsUtils.EMAIL;
+import static com.helloworld.FunctionsUtils.NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -31,13 +34,13 @@ public class HttpToCosmosDBStoreAnnotationFunctionTest {
         @SuppressWarnings("unchecked") final HttpRequestMessage<Optional<String>> req = mock(HttpRequestMessage.class);
 
         final Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("name", "Nebrass");
-        queryParams.put("email", "lnibrass@gmail.com");
+        queryParams.put(NAME, "Nebrass");
+        queryParams.put(EMAIL, "lnibrass@gmail.com");
 
         doReturn(queryParams).when(req).getQueryParameters();
 
-        final Optional<String> queryBody = Optional.empty();
-        doReturn(queryBody).when(req).getBody();
+        JSONObject jsonObject = new JSONObject(queryParams);
+        doReturn(Optional.of(jsonObject.toString())).when(req).getBody();
 
         doAnswer(new Answer<HttpResponseMessage.Builder>() {
             @Override
@@ -51,10 +54,11 @@ public class HttpToCosmosDBStoreAnnotationFunctionTest {
         doReturn(Logger.getGlobal()).when(context).getLogger();
 
         // Invoke
-        final String ret = new HttpToCosmosDBStoreAnnotationFunction().run(req, context);
+        final String response = new HttpToCosmosDBStoreAnnotationFunction().run(req, context);
+        JSONObject responseJsonObject = new JSONObject(response);
 
         // Verify
-        assertTrue(ret.contains("\"name\":\"Nebrass\""));
-        assertTrue(ret.contains("\"email\":\"lnibrass@gmail.com\""));
+        assertEquals(responseJsonObject.getString(NAME), "Nebrass");
+        assertEquals(responseJsonObject.getString(EMAIL), "lnibrass@gmail.com");
     }
 }

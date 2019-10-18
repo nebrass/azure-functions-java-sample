@@ -10,9 +10,8 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import org.json.JSONObject;
 
 import java.util.Optional;
-import java.util.Random;
 
-import static com.helloworld.HttpToCosmosDBStoreBindingFunction.EMPTY;
+import static com.helloworld.FunctionsUtils.*;
 
 /**
  * Azure Functions with HTTP Trigger and CosmosDB output.
@@ -20,7 +19,8 @@ import static com.helloworld.HttpToCosmosDBStoreBindingFunction.EMPTY;
 public class HttpToCosmosDBStoreAnnotationFunction {
 
     @FunctionName("CosmosDBStoreAnnotation")
-    @CosmosDBOutput(name = "database",
+    @CosmosDBOutput(
+            name = "database",
             databaseName = "university",
             collectionName = "students",
             connectionStringSetting = "CosmosDbConnection")
@@ -30,7 +30,7 @@ public class HttpToCosmosDBStoreAnnotationFunction {
                     methods = {HttpMethod.POST},
                     authLevel = AuthorizationLevel.FUNCTION) HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context) {
-        context.getLogger().info("Java HTTP trigger processed a request.");
+        context.getLogger().info(JAVA_HTTP_TRIGGER_PROCESSED_A_REQUEST);
 
         String name = EMPTY;
         String email = EMPTY;
@@ -38,17 +38,18 @@ public class HttpToCosmosDBStoreAnnotationFunction {
         // Parse query parameter
         if (request.getBody().isPresent()) {
             JSONObject jsonObject = new JSONObject(request.getBody().get());
-            name = jsonObject.getString("name");
-            email = jsonObject.getString("email");
+            name = jsonObject.getString(NAME);
+            email = jsonObject.getString(EMAIL);
         }
 
         // Generate random ID
-        final long id = Math.abs(new Random().nextInt());
+        final String id = String.valueOf(randomLong());
 
         // Generate document
-        final String database = new Student(id, name, email).toString();
+        Student student = new Student(id, name, email);
+        final String database = new JSONObject(student).toString();
 
-        context.getLogger().info(String.format("Document to be saved: %s", database));
+        context.getLogger().info(String.format(DOCUMENT_TO_BE_SAVED, database));
 
         return database;
     }

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import static com.helloworld.FunctionsUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -29,8 +30,8 @@ public class HttpToCosmosDBStoreBindingFunctionTest {
         @SuppressWarnings("unchecked") final OutputBinding<String> outputBinding = mock(OutputBinding.class);
 
         final Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("name", "Nebrass");
-        queryParams.put("email", "lnibrass@gmail.com");
+        queryParams.put(NAME, "Nebrass");
+        queryParams.put(EMAIL, "lnibrass@gmail.com");
 
         doReturn(queryParams).when(req).getQueryParameters();
 
@@ -59,6 +60,6 @@ public class HttpToCosmosDBStoreBindingFunctionTest {
 
         // Verify
         assertEquals(HttpStatus.OK, ret.getStatus());
-        assertEquals("Document created successfully.", ret.getBody());
+        assertEquals(DOCUMENT_CREATED_SUCCESSFULLY, ret.getBody());
     }
 }
