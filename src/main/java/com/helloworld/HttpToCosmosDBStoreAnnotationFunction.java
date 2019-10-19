@@ -47,7 +47,7 @@ public class HttpToCosmosDBStoreAnnotationFunction {
 
         // Generate document
         Student student = new Student(id, name, email);
-        final String database = new JSONObject(student).toString();
+        final String database = student.toString();
 
         context.getLogger().info(String.format(DOCUMENT_TO_BE_SAVED, database));
 

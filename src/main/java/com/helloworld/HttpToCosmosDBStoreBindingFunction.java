@@ -6,11 +6,9 @@ import com.microsoft.azure.functions.annotation.CosmosDBOutput;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 import java.util.Optional;
-
-import static com.helloworld.FunctionsUtils.*;
+import java.util.Random;
 
 /**
  * Azure Functions with HTTP Trigger and CosmosDB output binding.
@@ -30,32 +28,32 @@ public class HttpToCosmosDBStoreBindingFunction {
                     connectionStringSetting = "CosmosDbConnection")
                     OutputBinding<String> outputItem,
             final ExecutionContext context) {
-        context.getLogger().info(JAVA_HTTP_TRIGGER_PROCESSED_A_REQUEST);
+        context.getLogger().info("Java HTTP trigger processed a request.");
 
-        String name = EMPTY;
-        String email = EMPTY;
+        String name = "empty";
+        String email = "empty";
 
         // Parse query parameter
         if (request.getBody().isPresent()) {
             JSONObject jsonObject = new JSONObject(request.getBody().get());
-            name = jsonObject.getString(NAME);
-            email = jsonObject.getString(EMAIL);
+            name = jsonObject.getString("name");
+            email = jsonObject.getString("email");
         }
 
         // Generate random ID
-        final String id = String.valueOf(randomLong());
+        final String id = String.valueOf(Math.abs(new Random().nextInt()));
 
         // Generate document
         Student student = new Student(id, name, email);
-        final String database = JSONWriter.valueToString(student);
+        final String database = student.toString();
 
-        context.getLogger().info(String.format(DOCUMENT_TO_BE_SAVED, database));
+        context.getLogger().info(String.format("Document to be saved in DB: %s", database));
 
         outputItem.setValue(database);
 
-        // return a different document to the browser or calling client.
+        // return the document to calling client.
         return request.createResponseBuilder(HttpStatus.OK)
-                .body(DOCUMENT_CREATED_SUCCESSFULLY)
+                .body(database)
                 .build();
     }
 }

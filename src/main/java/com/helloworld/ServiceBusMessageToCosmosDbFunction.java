@@ -7,8 +7,6 @@ import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.ServiceBusQueueTrigger;
 import org.json.JSONObject;
 
-import static com.helloworld.FunctionsUtils.DOCUMENT_TO_BE_SAVED;
-
 public class ServiceBusMessageToCosmosDbFunction {
 
     @FunctionName("ServiceBusMessageToCosmosDb")
@@ -25,11 +23,12 @@ public class ServiceBusMessageToCosmosDbFunction {
                     connectionStringSetting = "CosmosDbConnection")
                     OutputBinding<String> outputItem,
             final ExecutionContext context) {
-        context.getLogger().info(String.format(FunctionsUtils.SERVICE_BUS_MESSAGE_TRIGGER_PROCESSED_A_REQUEST, student));
+        context.getLogger().info(String.format("Service Bus message trigger processed a request: %s", student));
 
+        // This line will be used to validate the received JSON
         String jsonValue = new JSONObject(student).toString();
 
-        context.getLogger().info(String.format(DOCUMENT_TO_BE_SAVED, jsonValue));
+        context.getLogger().info(String.format("Document to be saved in DB: %s", jsonValue));
 
         outputItem.setValue(jsonValue);
     }

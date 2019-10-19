@@ -1,6 +1,7 @@
 package com.helloworld;
 
 import com.microsoft.azure.functions.*;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -10,8 +11,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static com.helloworld.FunctionsUtils.*;
+import static com.helloworld.FunctionsUtils.EMAIL;
+import static com.helloworld.FunctionsUtils.NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -35,7 +38,7 @@ public class HttpToCosmosDBStoreBindingFunctionTest {
 
         doReturn(queryParams).when(req).getQueryParameters();
 
-        final Optional<String> queryBody = Optional.empty();
+        final Optional<String> queryBody = Optional.of(new JSONObject(queryParams).toString());
         doReturn(queryBody).when(req).getBody();
 
         doAnswer(new Answer<HttpResponseMessage.Builder>() {
@@ -60,6 +63,7 @@ public class HttpToCosmosDBStoreBindingFunctionTest {
 
         // Verify
         assertEquals(HttpStatus.OK, ret.getStatus());
-        assertEquals(DOCUMENT_CREATED_SUCCESSFULLY, ret.getBody());
+        assertTrue(String.valueOf(ret.getBody()).contains("\"name\":\"Nebrass\""));
+        assertTrue(String.valueOf(ret.getBody()).contains("\"email\":\"lnibrass@gmail.com\""));
     }
 }
